@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { Activity, AlertCircle, User, Shield } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 export function LoginPage() {
   const { setCurrentUser } = useApp();
@@ -21,6 +22,7 @@ export function LoginPage() {
     try {
       const res = await api.auth.login({ email: email.trim(), password });
       setCurrentUser(res.user);
+      toast.success(`Welcome, ${res.user.name}! Login successful.`);
       navigate("/dashboard");
     } catch (err: any) {
       console.error(err);

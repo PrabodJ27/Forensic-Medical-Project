@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { AppUser, Patient, MLEFForm, MLRReport, LabRequest, PMRForm } from "@/types";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface AppContextType {
   currentUser: AppUser | null;
@@ -103,8 +104,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         syncIdCache("USR", next);
         return next;
       });
+      toast.success(`User ${saved.name} (ID: ${saved.id}) created successfully!`);
     } catch (err) {
       console.error("Failed to add user:", err);
+      toast.error(`Failed to create user ${u.name}`);
     }
   };
 
@@ -116,8 +119,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         syncIdCache("P", next);
         return next;
       });
+      toast.success(`Patient ${saved.name} (ID: ${saved.id}) registered successfully!`);
     } catch (err) {
       console.error("Failed to add patient:", err);
+      toast.error(`Failed to register patient ${p.name}`);
     }
   };
 
@@ -129,8 +134,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         syncIdCache("MLEF", next);
         return next;
       });
+      toast.success(`MLEF Form ${saved.id} saved successfully!`);
     } catch (err) {
       console.error("Failed to save MLEF form:", err);
+      toast.error(`Failed to save MLEF Form ${f.id}`);
     }
   };
 
@@ -143,8 +150,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         syncGrievousCache(next);
         return next;
       });
+      toast.success(`MLR Report ${saved.id} saved successfully!`);
     } catch (err) {
       console.error("Failed to save MLR report:", err);
+      toast.error(`Failed to save MLR Report ${r.id}`);
     }
   };
 
@@ -231,8 +240,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         syncIdCache("PMR", next);
         return next;
       });
+      toast.success(`PMR Form ${saved.id} saved successfully!`);
     } catch (err) {
       console.error("Failed to save PMR form:", err);
+      toast.error(`Failed to save PMR Form ${f.id}`);
     }
   };
 
