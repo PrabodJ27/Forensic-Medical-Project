@@ -27,7 +27,7 @@ export function PatientsPage() {
       <PageHeader
         title="Patient Records"
         subtitle="All registered patients and their associated forms"
-        actions={(isAdmin || isDoctor || isJmo)
+        actions={(isAdmin || isDoctor)
           ? <Btn variant="primary" icon={<Plus size={14} />} onClick={() => navigate("/patients/register")}>Register Patient</Btn>
           : undefined
         }
@@ -76,13 +76,13 @@ export function PatientsPage() {
                       {f.mlefNo || f.id} <Badge status={f.status} />
                     </Btn>
                   ))}
-                  {(isAdmin || isDoctor || isJmo) && (
+                  {(isAdmin || isDoctor) && (
                     <Btn variant="ghost" size="sm" icon={<Plus size={12} />}
                       onClick={() => navigate(`/mlef/new?patientId=${p.id}`)}>
                       New MLEF
                     </Btn>
                   )}
-                  {pMlef.length === 0 && !isAdmin && !isDoctor && !isJmo && (
+                  {pMlef.length === 0 && !isAdmin && !isDoctor && (
                     <span className="text-xs text-slate-400 italic">None</span>
                   )}
                 </div>

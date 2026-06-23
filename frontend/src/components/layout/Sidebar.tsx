@@ -41,7 +41,6 @@ const LAB_NAV: NavItem[] = [
 const JMO_NAV: NavItem[] = [
   { to: "/dashboard",           label: "Dashboard",        icon: <Activity size={16} /> },
   { to: "/patients",            label: "Patients",         icon: <Users size={16} /> },
-  { to: "/patients/register",   label: "Register Patient", icon: <Plus size={16} /> },
   { to: "/mlef",                label: "MLEF Forms",       icon: <ClipboardList size={16} /> },
   { to: "/mlr",                 label: "MLR Reports",      icon: <FileText size={16} /> },
   { to: "/autopsy",             label: "Autopsy Forms",    icon: <Clipboard size={16} /> },
