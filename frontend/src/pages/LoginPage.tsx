@@ -4,6 +4,8 @@ import { Activity, AlertCircle, User, Shield, Stethoscope, FlaskConical, Scale }
 import { useApp } from "@/context/AppContext";
 import { cls } from "@/lib/utils";
 import type { Role } from "@/types";
+import { USERS } from "@/data/mockData";
+import { api } from "@/lib/api";
 
 const ROLE_ICONS: Record<Role, React.ReactNode> = {
   doctor: <Stethoscope size={14} />,
@@ -20,7 +22,7 @@ const ROLE_COLORS: Record<Role, string> = {
 };
 
 export function LoginPage() {
-  const { setCurrentUser, users: USERS } = useApp();
+  const { setCurrentUser } = useApp();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -29,20 +31,20 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setTimeout(() => {
-      const match = USERS.find(u => u.email === email.trim() && u.password === password);
-      if (match) {
-        setCurrentUser(match);
-        navigate("/dashboard");
-      } else {
-        setError("Invalid email or password. Please try again.");
-      }
+    try {
+      const res = await api.auth.login({ email: email.trim(), password });
+      setCurrentUser(res.user);
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Invalid email or password. Please try again.");
+    } finally {
       setLoading(false);
-    }, 400);
+    }
   };
 
   return (

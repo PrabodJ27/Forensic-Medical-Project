@@ -79,7 +79,7 @@ class MlrModel {
             const values = [
                 m.specialInvestigations, m.nonGrievousNos, m.deathCausingCount,
                 m.bluntWeaponNos, m.bluntContusionNos, m.cutNos, m.sharpCuttingNos,
-                m.stabNos, m.firearmsNos, m.burns_nos, m.biteNos, m.furtherNotes,
+                m.stabNos, m.firearmsNos, m.burnsNos, m.biteNos, m.furtherNotes,
                 m.patientSmellLiquor, m.underInfluenceLiquor, m.doctorName,
                 m.doctorQualifications, m.designation, m.station, m.dateOfDespatch,
                 m.labRequestId, m.status, id
