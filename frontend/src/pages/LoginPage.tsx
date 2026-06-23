@@ -1,25 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Activity, AlertCircle, User, Shield, Stethoscope, FlaskConical, Scale } from "lucide-react";
+import { Activity, AlertCircle, User, Shield } from "lucide-react";
 import { useApp } from "@/context/AppContext";
-import { cls } from "@/lib/utils";
-import type { Role } from "@/types";
-import { USERS } from "@/data/mockData";
 import { api } from "@/lib/api";
-
-const ROLE_ICONS: Record<Role, React.ReactNode> = {
-  doctor: <Stethoscope size={14} />,
-  admin:  <Shield size={14} />,
-  lab:    <FlaskConical size={14} />,
-  jmo:    <Scale size={14} />,
-};
-
-const ROLE_COLORS: Record<Role, string> = {
-  doctor: "bg-blue-100 text-blue-700",
-  admin:  "bg-slate-100 text-slate-700",
-  lab:    "bg-emerald-100 text-emerald-700",
-  jmo:    "bg-purple-100 text-purple-700",
-};
 
 export function LoginPage() {
   const { setCurrentUser } = useApp();
@@ -103,27 +86,6 @@ export function LoginPage() {
             {loading ? "Signing in…" : "Sign In"}
           </button>
         </form>
-
-        {/* Demo credentials */}
-        <div className="mt-5 bg-white/5 border border-white/10 rounded-xl p-4">
-          <p className="text-xs text-blue-300 font-semibold mb-3 uppercase tracking-wide">Demo Credentials</p>
-          <div className="space-y-2">
-            {USERS.map(u => (
-              <button key={u.id} type="button"
-                onClick={() => { setEmail(u.email); setPassword(u.password); setError(""); }}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left">
-                <div className="flex items-center gap-2">
-                  <span className={cls("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium", ROLE_COLORS[u.role])}>
-                    {ROLE_ICONS[u.role]} {u.role}
-                  </span>
-                  <span className="text-xs text-white/80">{u.name}</span>
-                </div>
-                <span className="text-xs font-mono text-blue-300/70">{u.email}</span>
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-blue-300/50 mt-2 text-center">Click any row to auto-fill</p>
-        </div>
       </div>
     </div>
   );
