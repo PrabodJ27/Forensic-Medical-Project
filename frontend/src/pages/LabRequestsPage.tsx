@@ -4,6 +4,7 @@ import { useApp } from "@/context/AppContext";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
 import { Btn } from "@/components/ui/Btn";
+import { Input } from "@/components/ui/Input";
 import { UrgencyBadge } from "@/components/ui/UrgencyBadge";
 import { LabRequestModal } from "@/components/lab/LabRequestModal";
 import { LabReportModal } from "@/components/lab/LabReportModal";
@@ -11,10 +12,11 @@ import { TEST_LABELS } from "@/data/mockData";
 import type { LabRequest } from "@/types";
 
 export function LabRequestsPage() {
-  const { currentUser, patients, labRequests, addLabRequest, updateLabRequest, linkLabRequest } = useApp();
+  const { currentUser, patients, labRequests, addLabRequest, updateLabRequest } = useApp();
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   if (!currentUser) return null;
 
@@ -30,6 +32,17 @@ export function LabRequestsPage() {
   const patientMap = Object.fromEntries(patients.map(p => [p.id, p]));
   const activeReport = activeReportId ? labRequests.find(r => r.id === activeReportId) ?? null : null;
 
+  const filtered = visible.filter(req => {
+    const p = patientMap[req.patientId];
+    const patientName = p ? p.name.toLowerCase() : "";
+    const patientId = req.patientId.toLowerCase();
+    const requestId = req.id.toLowerCase();
+    const status = req.status.toLowerCase();
+    const urgency = req.urgency.toLowerCase();
+    const query = search.toLowerCase();
+    return requestId.includes(query) || patientId.includes(query) || patientName.includes(query) || status.includes(query) || urgency.includes(query);
+  });
+
   const handleSaveRequest = (req: LabRequest) => {
     addLabRequest(req);
     setShowRequestModal(false);
@@ -42,12 +55,16 @@ export function LabRequestsPage() {
         subtitle={isLab ? "All pending and completed requests" : isAdmin ? "All lab requests — view only" : "Requests you have submitted"}
       />
 
+      <div className="mb-4">
+        <Input value={search} onChange={setSearch} placeholder="Search by ID, patient name, patient ID, status or urgency..." />
+      </div>
+
       <div className="bg-card border border-border rounded-xl overflow-hidden">
-        {visible.length === 0
+        {filtered.length === 0
           ? <div className="px-5 py-10 text-center text-slate-400 text-sm">No lab requests found.</div>
           : (
             <div className="divide-y divide-border">
-              {visible.map(req => {
+              {filtered.map(req => {
                 const p = patientMap[req.patientId];
                 return (
                   <div key={req.id} className="px-5 py-4 hover:bg-muted/40 transition-colors">

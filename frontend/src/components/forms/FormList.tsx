@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Btn } from "@/components/ui/Btn";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Input } from "@/components/ui/Input";
 import type { Patient } from "@/types";
 
 interface ListItem {
@@ -23,7 +25,18 @@ interface FormListProps<T extends ListItem> {
 }
 
 export function FormList<T extends ListItem>({ title, icon, items, patients, onOpen, onNew, newLabel, renderExtra }: FormListProps<T>) {
+  const [search, setSearch] = useState("");
   const patientMap = Object.fromEntries(patients.map(p => [p.id, p]));
+
+  const filtered = items.filter(item => {
+    const p = patientMap[item.patientId];
+    const patientName = p ? p.name.toLowerCase() : "";
+    const patientId = item.patientId.toLowerCase();
+    const formId = item.id.toLowerCase();
+    const status = item.status.toLowerCase();
+    const query = search.toLowerCase();
+    return formId.includes(query) || patientId.includes(query) || patientName.includes(query) || status.includes(query);
+  });
 
   return (
     <div>
@@ -34,12 +47,17 @@ export function FormList<T extends ListItem>({ title, icon, items, patients, onO
           : undefined
         }
       />
+
+      <div className="mb-4">
+        <Input value={search} onChange={setSearch} placeholder="Search by ID, patient name, patient ID or status..." />
+      </div>
+
       <div className="bg-card border border-border rounded-xl overflow-hidden">
-        {items.length === 0
+        {filtered.length === 0
           ? <div className="px-5 py-10 text-center text-slate-400 text-sm">No records found.</div>
           : (
             <div className="divide-y divide-border">
-              {items.map(item => {
+              {filtered.map(item => {
                 const p = patientMap[item.patientId];
                 return (
                   <div key={item.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/40 transition-colors">
