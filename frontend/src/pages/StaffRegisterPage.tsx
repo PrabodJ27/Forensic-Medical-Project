@@ -28,7 +28,7 @@ export function StaffRegisterPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    name: "", username: "", password: "", confirmPassword: "",
+    name: "", email: "", phone: "", password: "", confirmPassword: "",
     role: "doctor" as Role, designation: "",
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -42,11 +42,12 @@ export function StaffRegisterPage() {
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!form.name.trim())        e.name        = "Full name is required.";
-    if (!form.username.trim())    e.username     = "Username is required.";
+    if (!form.email.trim())       e.email       = "Email is required.";
+    if (!form.phone.trim())       e.phone       = "Phone number is required.";
     if (!form.designation.trim()) e.designation  = "Designation is required.";
     if (form.password.length < 6) e.password     = "Password must be at least 6 characters.";
     if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords do not match.";
-    if (users.some(u => u.username === form.username.trim())) e.username = "Username already exists.";
+    if (users.some(u => u.email === form.email.trim())) e.email = "Email already exists.";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -56,7 +57,8 @@ export function StaffRegisterPage() {
     const newUser: AppUser = {
       id: genId("USR"),
       name: form.name.trim(),
-      username: form.username.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
       password: form.password,
       role: form.role,
       designation: form.designation.trim(),
@@ -88,6 +90,11 @@ export function StaffRegisterPage() {
             {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
           </FormField>
 
+          <FormField label="Phone Number" required>
+            <Input value={form.phone} onChange={set("phone")} placeholder="e.g. 0771234567" />
+            {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
+          </FormField>
+
           <FormField label="Role" required>
             <Select value={form.role} onChange={v => { set("role")(v); set("designation")(""); }}
               options={ROLE_OPTIONS} />
@@ -111,10 +118,10 @@ export function StaffRegisterPage() {
         </FormSection>
 
         <FormSection title="Login Credentials">
-          <FormField label="Username" required>
-            <Input value={form.username} onChange={set("username")} placeholder="e.g. dr.perera" />
-            {errors.username && <p className="text-xs text-red-600 mt-1">{errors.username}</p>}
-            <p className="text-xs text-slate-400 mt-1">Lowercase letters, numbers and dots only. No spaces.</p>
+          <FormField label="Email Address" required>
+            <Input value={form.email} onChange={set("email")} placeholder="e.g. dr.perera@forensic.gov" />
+            {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
+            <p className="text-xs text-slate-400 mt-1">Enter a valid email address.</p>
           </FormField>
 
           <FormField label="Password" required>
@@ -148,7 +155,7 @@ export function StaffRegisterPage() {
 
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
           <strong>Note:</strong> The new staff member will be able to log in immediately after registration.
-          Share the username and password with them securely.
+          Share the email and password with them securely.
         </div>
       </div>
     </div>

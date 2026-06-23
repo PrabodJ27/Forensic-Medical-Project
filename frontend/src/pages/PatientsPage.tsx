@@ -53,7 +53,7 @@ export function PatientsPage() {
                   </div>
                   <div>
                     <div className="font-semibold text-slate-800">{p.name}</div>
-                    <div className="text-xs text-slate-500 mt-0.5">{p.id} · {p.sex}, {p.age} yrs · NIC: {p.nic}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{p.id} · {p.sex}, {p.age} yrs · NIC: {p.nic} · Email: {p.email} · Phone: {p.phone}</div>
                     <div className="text-xs text-slate-400 mt-0.5">{p.address}</div>
                   </div>
                 </div>

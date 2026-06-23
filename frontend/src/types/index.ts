@@ -9,7 +9,8 @@ export interface AppUser {
   name: string;
   role: Role;
   designation: string;
-  username: string;
+  email: string;
+  phone: string;
   password: string;
 }
 
@@ -21,6 +22,8 @@ export interface Patient {
   sex: string;
   address: string;
   nic: string;
+  email: string;
+  phone: string;
   registeredAt: string;
   registeredBy: string;
 }

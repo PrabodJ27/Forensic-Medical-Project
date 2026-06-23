@@ -3,6 +3,7 @@ import { Save, FlaskConical, Eye, Plus, X } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Btn } from "@/components/ui/Btn";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { FormSection } from "@/components/ui/FormSection";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -12,17 +13,21 @@ import type { PMRForm as PMRFormType, Patient, AppUser, LabRequest, BodyIdentifi
 interface Props {
   form: PMRFormType | null;
   patient: Patient | null;
+  allPatients: Patient[];
   currentUser: AppUser;
   labRequest: LabRequest | null;
   readOnly?: boolean;
   onSave: (f: PMRFormType) => void;
   onBack: () => void;
-  onRequestLab: (patientId: string, formId: string, formType: string) => void;
+  onRequestLab: (patientId: string, formId: string, formType: string, onLink: (labReqId: string) => void) => void;
 }
 
-export function PMRForm({ form: initForm, patient, currentUser, labRequest, readOnly = false, onSave, onBack, onRequestLab }: Props) {
+export function PMRForm({ form: initForm, patient: initPatient, allPatients, currentUser, labRequest, readOnly = false, onSave, onBack, onRequestLab }: Props) {
   const isNew = !initForm;
   const now = new Date().toISOString();
+
+  const [selectedPatientId, setSelectedPatientId] = useState(initPatient?.id ?? initForm?.patientId ?? "");
+  const patient = allPatients?.find(p => p.id === selectedPatientId) ?? initPatient;
 
   const [f, setF] = useState<PMRFormType>(initForm ?? {
     id: genId("PMR"), patientId: patient?.id ?? "",
@@ -39,6 +44,14 @@ export function PMRForm({ form: initForm, patient, currentUser, labRequest, read
     jmoName: currentUser.role === "jmo" ? currentUser.name : "",
     labRequestId: "", status: "draft", createdAt: now, createdBy: currentUser.id,
   });
+
+  const handleSelectPatient = (pId: string) => {
+    setSelectedPatientId(pId);
+    const p = allPatients.find(x => x.id === pId);
+    if (p) {
+      setF(prev => ({ ...prev, patientId: p.id, deceasedName: p.name }));
+    }
+  };
 
   const s = (k: keyof PMRFormType) => (v: string) => setF(prev => ({ ...prev, [k]: v }));
 
@@ -71,12 +84,14 @@ export function PMRForm({ form: initForm, patient, currentUser, labRequest, read
           <div className="flex gap-2">
             {!readOnly && !f.labRequestId && (
               <Btn variant="secondary" size="sm" icon={<FlaskConical size={13} />}
-                onClick={() => onRequestLab(f.patientId, f.id, "pmr")}>
+                disabled={!f.patientId}
+                onClick={() => onRequestLab(f.patientId, f.id, "pmr", (labReqId) => setF(prev => ({ ...prev, labRequestId: labReqId })))}>
                 Request Lab Report
               </Btn>
             )}
             {!readOnly && (
               <Btn variant="primary" icon={<Save size={14} />}
+                disabled={!f.patientId}
                 onClick={() => { onSave({ ...f, status: "submitted" }); onBack(); }}>
                 Save PMR Report
               </Btn>
@@ -94,6 +109,20 @@ export function PMRForm({ form: initForm, patient, currentUser, labRequest, read
       {f.labRequestId && labRequest && (
         <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-800">
           <FlaskConical size={15} /> Lab Requested · Status: <Badge status={labRequest.status} />
+        </div>
+      )}
+
+      {isNew && !initPatient && allPatients && (
+        <div className="mb-5 p-4 bg-blue-50 border border-blue-200 rounded-xl max-w-3xl">
+          <label className="block text-xs font-semibold text-slate-600 mb-2 uppercase tracking-wide">
+            Select Deceased Patient <span className="text-red-500">*</span>
+          </label>
+          <Select
+            value={selectedPatientId}
+            onChange={handleSelectPatient}
+            placeholder="— Choose a patient —"
+            options={allPatients.map(p => ({ value: p.id, label: `${p.name} (${p.id}) · NIC: ${p.nic}` }))}
+          />
         </div>
       )}
 

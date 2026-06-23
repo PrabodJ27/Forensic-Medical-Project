@@ -21,24 +21,40 @@ export function PMRFormPage() {
     : null;
 
   const [showLabModal, setShowLabModal] = useState(false);
-  const [labCtx, setLabCtx] = useState<{ patientId: string; formId: string; formType: string } | null>(null);
+  const [labCtx, setLabCtx] = useState<{
+    patientId: string;
+    formId: string;
+    formType: string;
+    onLink: (labReqId: string) => void;
+  } | null>(null);
 
   if (!currentUser) return null;
   const readOnly = currentUser.role !== "jmo";
 
   const handleSaveLabRequest = (req: LabRequest) => {
     addLabRequest(req);
-    if (labCtx) linkLabRequest(labCtx.formType, labCtx.formId, req.id);
+    if (labCtx) {
+      linkLabRequest(labCtx.formType, labCtx.formId, req.id);
+      labCtx.onLink(req.id);
+    }
     setShowLabModal(false);
   };
 
   return (
     <>
       <PMRForm
-        form={form} patient={patient} currentUser={currentUser} labRequest={labRequest} readOnly={readOnly}
+        form={form}
+        patient={patient}
+        allPatients={patients}
+        currentUser={currentUser}
+        labRequest={labRequest}
+        readOnly={readOnly}
         onSave={f => { savePmrForm(f); navigate("/pmr"); }}
         onBack={() => navigate("/pmr")}
-        onRequestLab={(pid, fid, ftype) => { setLabCtx({ patientId: pid, formId: fid, formType: ftype }); setShowLabModal(true); }}
+        onRequestLab={(pid, fid, ftype, onLink) => {
+          setLabCtx({ patientId: pid, formId: fid, formType: ftype, onLink });
+          setShowLabModal(true);
+        }}
       />
       {showLabModal && labCtx && (
         <LabRequestModal

@@ -1,19 +1,19 @@
 import type { AppUser, Patient, MLEFForm, LabRequest } from "@/types";
 
 export const USERS: AppUser[] = [
-  { id: "d1", name: "Dr. Amal Perera",        role: "doctor", designation: "Medical Officer",        username: "dr.perera",   password: "Doctor@123" },
-  { id: "d2", name: "Dr. Saman Fernando",      role: "doctor", designation: "Senior Medical Officer", username: "dr.fernando", password: "Doctor@456" },
-  { id: "a1", name: "Nimal Silva",             role: "admin",  designation: "Admin Officer",          username: "nimal.silva", password: "Admin@123"  },
-  { id: "a2", name: "Kamani Dissanayake",      role: "admin",  designation: "Police Officer",         username: "kamani.d",    password: "Admin@456"  },
-  { id: "l1", name: "Chaminda Wickramasinghe", role: "lab",    designation: "Lab Technician",         username: "chaminda.w",  password: "Lab@123"    },
-  { id: "l2", name: "Dilini Jayawardena",      role: "lab",    designation: "Senior Lab Technician",  username: "dilini.j",    password: "Lab@456"    },
-  { id: "j1", name: "Dr. Ruwan Perera",        role: "jmo",    designation: "Judicial Medical Officer", username: "dr.ruwan",   password: "Jmo@123"    },
+  { id: "d1", name: "Dr. Amal Perera",        role: "doctor", designation: "Medical Officer",        email: "dr.perera@forensic.gov",   phone: "0771234567", password: "Doctor@123" },
+  { id: "d2", name: "Dr. Saman Fernando",      role: "doctor", designation: "Senior Medical Officer", email: "dr.fernando@forensic.gov", phone: "0772345678", password: "Doctor@456" },
+  { id: "a1", name: "Nimal Silva",             role: "admin",  designation: "Admin Officer",          email: "nimal.silva@forensic.gov", phone: "0773456789", password: "Admin@123"  },
+  { id: "a2", name: "Kamani Dissanayake",      role: "admin",  designation: "Police Officer",         email: "kamani.d@forensic.gov",    phone: "0774567890", password: "Admin@456"  },
+  { id: "l1", name: "Chaminda Wickramasinghe", role: "lab",    designation: "Lab Technician",         email: "chaminda.w@forensic.gov",  phone: "0775678901", password: "Lab@123"    },
+  { id: "l2", name: "Dilini Jayawardena",      role: "lab",    designation: "Senior Lab Technician",  email: "dilini.j@forensic.gov",    phone: "0776789012", password: "Lab@456"    },
+  { id: "j1", name: "Dr. Ruwan Perera",        role: "jmo",    designation: "Judicial Medical Officer", email: "dr.ruwan@forensic.gov",   phone: "0777890123", password: "Jmo@123"    },
 ];
 
 export const INIT_PATIENTS: Patient[] = [
-  { id: "P2026-001", name: "Ruwan Kumara",    dob: "1985-03-15", age: 41, sex: "Male",   address: "123 Galle Road, Colombo 03",   nic: "851530423V", registeredAt: "2026-06-20T08:30:00", registeredBy: "Nimal Silva" },
-  { id: "P2026-002", name: "Shamila Perera",  dob: "1992-07-22", age: 33, sex: "Female", address: "45 Kandy Road, Kurunegala",     nic: "927040756V", registeredAt: "2026-06-21T09:15:00", registeredBy: "Kamani Dissanayake" },
-  { id: "P2026-003", name: "Ajith Bandara",   dob: "1978-11-08", age: 47, sex: "Male",   address: "78 Negombo Road, Wattala",      nic: "782130589V", registeredAt: "2026-06-21T10:00:00", registeredBy: "Nimal Silva" },
+  { id: "P2026-001", name: "Ruwan Kumara",    dob: "1985-03-15", age: 41, sex: "Male",   address: "123 Galle Road, Colombo 03",   nic: "851530423V", email: "ruwan.k@gmail.com", phone: "0711234567", registeredAt: "2026-06-20T08:30:00", registeredBy: "Nimal Silva" },
+  { id: "P2026-002", name: "Shamila Perera",  dob: "1992-07-22", age: 33, sex: "Female", address: "45 Kandy Road, Kurunegala",     nic: "927040756V", email: "shamila.p@gmail.com", phone: "0712345678", registeredAt: "2026-06-21T09:15:00", registeredBy: "Kamani Dissanayake" },
+  { id: "P2026-003", name: "Ajith Bandara",   dob: "1978-11-08", age: 47, sex: "Male",   address: "78 Negombo Road, Wattala",      nic: "782130589V", email: "ajith.b@gmail.com", phone: "0713456789", registeredAt: "2026-06-21T10:00:00", registeredBy: "Nimal Silva" },
 ];
 
 export const INIT_MLEF: MLEFForm[] = [{

@@ -61,11 +61,14 @@ export function StaffListPage() {
                     <div className="text-xs text-slate-500">{u.designation}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={cls("inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium", ROLE_COLORS[u.role])}>
-                    {ROLE_ICONS[u.role]} {ROLE_LABELS[u.role]}
-                  </span>
-                  <code className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">{u.username}</code>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cls("inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium", ROLE_COLORS[u.role])}>
+                      {ROLE_ICONS[u.role]} {ROLE_LABELS[u.role]}
+                    </span>
+                    <code className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">{u.email}</code>
+                  </div>
+                  <span className="text-xs text-slate-400 font-medium">Phone: {u.phone}</span>
                 </div>
               </div>
             ))}

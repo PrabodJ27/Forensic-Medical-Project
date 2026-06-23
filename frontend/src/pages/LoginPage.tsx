@@ -23,7 +23,7 @@ export function LoginPage() {
   const { setCurrentUser, users: USERS } = useApp();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -34,12 +34,12 @@ export function LoginPage() {
     setError("");
     setLoading(true);
     setTimeout(() => {
-      const match = USERS.find(u => u.username === username.trim() && u.password === password);
+      const match = USERS.find(u => u.email === email.trim() && u.password === password);
       if (match) {
         setCurrentUser(match);
         navigate("/dashboard");
       } else {
-        setError("Invalid username or password. Please try again.");
+        setError("Invalid email or password. Please try again.");
       }
       setLoading(false);
     }, 400);
@@ -63,12 +63,12 @@ export function LoginPage() {
           <p className="text-sm text-slate-500 mb-6">Enter your credentials to access the system.</p>
 
           <div className="mb-4">
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Username</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Email Address</label>
             <div className="relative">
               <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input type="text" value={username}
-                onChange={e => { setUsername(e.target.value); setError(""); }}
-                placeholder="e.g. dr.perera"
+              <input type="email" value={email}
+                onChange={e => { setEmail(e.target.value); setError(""); }}
+                placeholder="e.g. dr.perera@forensic.gov"
                 className="w-full border border-slate-300 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors"
               />
             </div>
@@ -96,7 +96,7 @@ export function LoginPage() {
             </div>
           )}
 
-          <button type="submit" disabled={!username || !password || loading}
+          <button type="submit" disabled={!email || !password || loading}
             className="w-full bg-primary text-white font-semibold py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
             {loading ? "Signing in…" : "Sign In"}
           </button>
@@ -108,7 +108,7 @@ export function LoginPage() {
           <div className="space-y-2">
             {USERS.map(u => (
               <button key={u.id} type="button"
-                onClick={() => { setUsername(u.username); setPassword(u.password); setError(""); }}
+                onClick={() => { setEmail(u.email); setPassword(u.password); setError(""); }}
                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-left">
                 <div className="flex items-center gap-2">
                   <span className={cls("inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium", ROLE_COLORS[u.role])}>
@@ -116,7 +116,7 @@ export function LoginPage() {
                   </span>
                   <span className="text-xs text-white/80">{u.name}</span>
                 </div>
-                <span className="text-xs font-mono text-blue-300/70">{u.username}</span>
+                <span className="text-xs font-mono text-blue-300/70">{u.email}</span>
               </button>
             ))}
           </div>
