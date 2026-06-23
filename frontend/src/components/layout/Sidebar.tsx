@@ -108,9 +108,21 @@ export function Sidebar({ user, onLogout }: SidebarProps) {
 
       <div className="p-3 border-t border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2 mb-2">
-          <div className={cls("w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0", ROLE_COLORS[user.role])}>
-            {user.name.charAt(0)}
-          </div>
+          {user.profilePictureUrl ? (
+            <img
+              src={user.profilePictureUrl}
+              alt={user.name}
+              className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-slate-700"
+              onError={(e) => {
+                // Remove src and hide image on error
+                (e.currentTarget as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className={cls("w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0", ROLE_COLORS[user.role])}>
+              {user.name.charAt(0)}
+            </div>
+          )}
           <div className="min-w-0">
             <div className="text-xs font-semibold text-white truncate">{user.name}</div>
             <div className="text-xs text-slate-500 truncate">{user.designation}</div>

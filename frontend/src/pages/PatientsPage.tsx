@@ -48,9 +48,20 @@ export function PatientsPage() {
               {/* Patient header */}
               <div className="px-5 py-4 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-                    {p.name.charAt(0)}
-                  </div>
+                  {p.profilePictureUrl ? (
+                    <img
+                      src={p.profilePictureUrl}
+                      alt={p.name}
+                      className="w-10 h-10 rounded-full object-cover border border-slate-200 flex-shrink-0"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
+                      {p.name.charAt(0)}
+                    </div>
+                  )}
                   <div>
                     <div className="font-semibold text-slate-800">{p.name}</div>
                     <div className="text-xs text-slate-500 mt-0.5">{p.id} · {p.sex}, {p.age} yrs · NIC: {p.nic} · Email: {p.email} · Phone: {p.phone}</div>

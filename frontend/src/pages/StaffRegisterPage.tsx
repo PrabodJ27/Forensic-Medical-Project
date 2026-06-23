@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Save, Eye, EyeOff } from "lucide-react";
+import { Save, Eye, EyeOff, User } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Btn } from "@/components/ui/Btn";
@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { FormField } from "@/components/ui/FormField";
 import { FormSection } from "@/components/ui/FormSection";
-import { genId } from "@/lib/utils";
+import { genId, cls } from "@/lib/utils";
 import type { AppUser, Role } from "@/types";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const ROLE_OPTIONS = [
   { value: "doctor", label: "Doctor / Medical Officer" },
@@ -34,6 +36,31 @@ export function StaffRegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image file size should be less than 2MB");
+        return;
+      }
+      setImageFile(file);
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview("");
+    }
+  };
+
   const set = (k: string) => (v: string) => {
     setForm(f => ({ ...f, [k]: v }));
     setErrors(e => ({ ...e, [k]: "" }));
@@ -52,19 +79,32 @@ export function StaffRegisterPage() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validate()) return;
-    const newUser: AppUser = {
-      id: genId("USR"),
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      password: form.password,
-      role: form.role,
-      designation: form.designation.trim(),
-    };
-    addUser(newUser);
-    navigate("/staff");
+    setIsSubmitting(true);
+    let profilePictureUrl = "";
+    try {
+      if (imageFile) {
+        profilePictureUrl = await api.storage.uploadImage(imageFile);
+      }
+      const newUser: AppUser = {
+        id: genId("USR"),
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        password: form.password,
+        role: form.role,
+        designation: form.designation.trim(),
+        profilePictureUrl: profilePictureUrl || undefined,
+      };
+      await addUser(newUser);
+      navigate("/staff");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to register staff. Profile picture upload might have failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const presets = DESIGNATION_PRESETS[form.role] ?? [];
@@ -77,14 +117,64 @@ export function StaffRegisterPage() {
         onBack={() => navigate("/staff")}
         actions={
           <>
-            <Btn variant="secondary" onClick={() => navigate("/staff")}>Cancel</Btn>
-            <Btn variant="primary" icon={<Save size={14} />} onClick={handleSave}>Register Staff</Btn>
+            <Btn variant="secondary" onClick={() => navigate("/staff")} disabled={isSubmitting}>Cancel</Btn>
+            <Btn variant="primary" icon={<Save size={14} />} onClick={handleSave} disabled={isSubmitting}>
+              {isSubmitting ? "Registering..." : "Register Staff"}
+            </Btn>
           </>
         }
       />
 
       <div className="max-w-xl">
         <FormSection title="Personal Details">
+          <FormField label="Profile Picture">
+            <div className="flex items-center gap-4 mt-1">
+              <div className="relative group w-20 h-20 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden bg-slate-50 hover:bg-slate-100/80 transition-colors">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="text-slate-400 flex flex-col items-center gap-1">
+                    <User size={24} />
+                    <span className="text-[10px] font-medium">Upload</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className={cls(
+                  "cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded px-2.5 py-1 text-xs font-medium inline-block text-center transition-colors",
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                )}>
+                  Choose File
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                    disabled={isSubmitting}
+                  />
+                </label>
+                {imageFile && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    disabled={isSubmitting}
+                    className="text-red-500 hover:text-red-700 text-xs font-semibold text-left transition-colors disabled:opacity-50"
+                  >
+                    Remove Photo
+                  </button>
+                )}
+                <p className="text-[10px] text-slate-400">JPG, PNG or WEBP. Max 2MB.</p>
+              </div>
+            </div>
+          </FormField>
+
           <FormField label="Full Name" required>
             <Input value={form.name} onChange={set("name")} placeholder="e.g. Dr. Amal Perera" />
             {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}

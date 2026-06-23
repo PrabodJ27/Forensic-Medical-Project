@@ -13,7 +13,7 @@ export const registerUser = async (req, res) => {
             return res.status(403).json({ message: "Access denied. Admins only." });
         }
 
-        const { id, name, role, designation, email, phone, password } = req.body;
+        const { id, name, role, designation, email, phone, password, profilePictureUrl } = req.body;
 
         // Check if user exists
         const existingUser = await UserModel.getUserByEmail(email);
@@ -27,7 +27,7 @@ export const registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
         const newUser = await UserModel.createUser({
-            id, name, role, designation, email, phone, passwordHash
+            id, name, role, designation, email, phone, passwordHash, profilePictureUrl
         });
 
         res.status(201).json(newUser);
@@ -69,7 +69,8 @@ export const loginUser = async (req, res) => {
                 name: user.name,
                 role: user.role,
                 designation: user.designation,
-                email: user.email
+                email: user.email,
+                profilePictureUrl: user.profile_picture_url
             }
         });
     } catch (error) {

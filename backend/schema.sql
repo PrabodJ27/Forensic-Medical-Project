@@ -9,6 +9,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     phone VARCHAR(50) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    profile_picture_url VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -23,6 +24,7 @@ CREATE TABLE patients (
     email VARCHAR(255) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     registered_by VARCHAR(255) NOT NULL, -- name of user
+    profile_picture_url VARCHAR(500),
     registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

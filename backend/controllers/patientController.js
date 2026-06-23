@@ -2,7 +2,7 @@ import PatientModel from "../models/PatientModel.js";
 
 export const registerPatient = async (req, res) => {
     try {
-        const { id, name, dob, sex, address, nic, email, phone } = req.body;
+        const { id, name, dob, sex, address, nic, email, phone, profilePictureUrl } = req.body;
 
         if (!id || !name || !dob || !sex || !address || !nic || !email || !phone) {
             return res.status(400).json({ message: "All fields are required" });
@@ -12,7 +12,7 @@ export const registerPatient = async (req, res) => {
         const registeredAt = new Date().toISOString();
 
         const newPatient = await PatientModel.createPatient({
-            id, name, dob, sex, address, nic, email, phone, registeredBy, registeredAt
+            id, name, dob, sex, address, nic, email, phone, registeredBy, registeredAt, profilePictureUrl
         });
 
         res.status(201).json(newPatient);

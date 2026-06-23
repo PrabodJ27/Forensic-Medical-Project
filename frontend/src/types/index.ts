@@ -11,7 +11,8 @@ export interface AppUser {
   designation: string;
   email: string;
   phone: string;
-  password: string;
+  password?: string;
+  profilePictureUrl?: string;
 }
 
 export interface Patient {
@@ -26,6 +27,7 @@ export interface Patient {
   phone: string;
   registeredAt: string;
   registeredBy: string;
+  profilePictureUrl?: string;
 }
 
 export interface MLEFForm {
