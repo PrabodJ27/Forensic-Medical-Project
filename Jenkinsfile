@@ -41,11 +41,10 @@ pipeline {
 
         stage('Deploy to Production') {
             steps {
-                // We run this directly in the Jenkins workspace so it uses the exact code that just passed the tests above.
                 sh '''
-                    docker-compose down
-                    docker-compose build --no-cache
-                    docker-compose up -d --remove-orphans
+                    docker compose down
+                    docker compose build --no-cache
+                    docker compose up -d --remove-orphans
                 '''
             }
         }
