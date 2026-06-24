@@ -42,7 +42,14 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 sh '''
+                    # 1. Copy the secure .env files from the server into the workspace
+                    cp /var/lib/jenkins/project_secrets/backend.env backend/.env
+                    cp /var/lib/jenkins/project_secrets/frontend.env frontend/.env
+                    
+                    # 2. Run the deployment
                     docker compose down
+                    
+                    # Because the .env files are now in the folders, this build step will securely pick them up
                     docker compose build --no-cache
                     docker compose up -d --remove-orphans
                 '''
