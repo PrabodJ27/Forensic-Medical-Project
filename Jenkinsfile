@@ -23,7 +23,7 @@ pipeline {
             steps {
                 dir('backend') {
                     // Installs dependencies using the Node.js we installed on your EC2
-                    sh 'npm install'
+                    sh 'npm ci'
                     
                     // Runs the newly added Jest + Supertest test suite
                     sh 'npm test'
@@ -35,7 +35,7 @@ pipeline {
         stage('Frontend Build & Test') {
             steps {
                 dir('frontend') {
-                    sh 'npm install'
+                    sh 'npm ci'
                     
                     // Runs the newly added Vitest + React Testing Library suite
                     sh 'npm test'
@@ -73,15 +73,9 @@ pipeline {
     post {
         success {
             echo '✅ Deployment Successful! The new version is live.'
-            mail to: 'e22130@eng.pdn.ac.lk',
-                 subject: "Jenkins Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Deployment was successful! The new version is live.\n\nCheck console output at: ${env.BUILD_URL}"
         }
         failure {
             echo '❌ Pipeline failed. Check the Jenkins logs. The previous working version is likely still running.'
-            mail to: 'e22130@eng.pdn.ac.lk',
-                 subject: "Jenkins Build Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Pipeline failed. Check the Jenkins logs.\n\nConsole output at: ${env.BUILD_URL}"
         }
         always {
             // Deletes the source code from the Jenkins folder after it finishes to save disk space
