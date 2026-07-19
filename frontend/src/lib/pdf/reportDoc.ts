@@ -47,6 +47,8 @@ interface DocMeta {
   reportId: string;
   /** Name of the signed-in user producing the file */
   generatedBy: string;
+  /** Record is not finalised — stamp it so it cannot pass as an official copy */
+  draft?: boolean;
 }
 
 /**
@@ -92,7 +94,10 @@ export class ReportDoc {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text(this.meta.title.toUpperCase(), MARGIN, 25.5);
+    const heading = this.meta.draft
+      ? `${this.meta.title.toUpperCase()}  —  DRAFT, NOT FINAL`
+      : this.meta.title.toUpperCase();
+    doc.text(heading, MARGIN, 25.5);
 
     // Report id, right aligned in the banner
     doc.setFont("helvetica", "bold");
@@ -129,6 +134,31 @@ export class ReportDoc {
       this.drawContinuationHeader();
       this.y = 18;
     }
+  }
+
+  /** Boxed warning banner, used for the draft disclaimer. */
+  notice(text: string) {
+    const { doc } = this;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    const lines = doc.splitTextToSize(text, this.contentWidth - 8);
+    const boxH = lines.length * 4 + 6;
+
+    this.ensureSpace(boxH + 4);
+
+    doc.setFillColor(254, 243, 199);
+    doc.setDrawColor(217, 119, 6);
+    doc.setLineWidth(0.4);
+    doc.rect(MARGIN, this.y, this.contentWidth, boxH, "FD");
+
+    doc.setTextColor(146, 64, 14);
+    doc.setFont("helvetica", "bold");
+    doc.text("DRAFT", MARGIN + 4, this.y + 5);
+    doc.setFont("helvetica", "normal");
+    doc.text(lines, MARGIN + 20, this.y + 5);
+    doc.setTextColor(0, 0, 0);
+
+    this.y += boxH + 5;
   }
 
   /** Section heading with a tinted bar. */
@@ -252,7 +282,32 @@ export class ReportDoc {
     this.y = ly + 2;
   }
 
-  /** Stamp footers on every page. Idempotent guard so it runs only once. */
+  /** Large translucent DRAFT stamp across the page. */
+  private drawWatermark() {
+    const { doc } = this;
+    const cx = this.pageWidth / 2;
+    const cy = this.pageHeight / 2;
+
+    doc.saveGraphicsState();
+    try {
+      // Translucency keeps the underlying text readable. Not every jsPDF build
+      // exposes GState, so fall back to a pale ink instead of failing the export.
+      const GState = (doc as any).GState;
+      if (GState) doc.setGState(new GState({ opacity: 0.12 }));
+      doc.setTextColor(200, 30, 30);
+    } catch {
+      doc.setTextColor(242, 214, 214);
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(78);
+    doc.text("DRAFT", cx, cy, { align: "center", angle: 38, baseline: "middle" });
+
+    doc.restoreGraphicsState();
+    doc.setTextColor(0, 0, 0);
+  }
+
+  /** Stamp footers (and any watermark) on every page. Runs only once. */
   private finalize() {
     if (this.finalized) return;
     this.finalized = true;
@@ -262,6 +317,9 @@ export class ReportDoc {
 
     for (let i = 1; i <= total; i++) {
       doc.setPage(i);
+
+      if (this.meta.draft) this.drawWatermark();
+
       const fy = this.pageHeight - 10;
 
       doc.setDrawColor(226, 232, 240);
@@ -271,7 +329,12 @@ export class ReportDoc {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
       doc.setTextColor(...SLATE);
-      doc.text("CONFIDENTIAL — Medico-legal document. Unauthorised disclosure is prohibited.", MARGIN, fy);
+      doc.text(
+        this.meta.draft
+          ? "CONFIDENTIAL — DRAFT. This record is incomplete and is not a certified medico-legal document."
+          : "CONFIDENTIAL — Medico-legal document. Unauthorised disclosure is prohibited.",
+        MARGIN, fy
+      );
       doc.text(`Downloaded by ${this.meta.generatedBy}`, MARGIN, fy + 3.5);
       doc.text(`Page ${i} of ${total}`, this.pageWidth - MARGIN, fy, { align: "right" });
       doc.setTextColor(0, 0, 0);

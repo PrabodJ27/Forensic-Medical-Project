@@ -1,13 +1,24 @@
 import type { MLEFForm, Patient } from "@/types";
 import { ReportDoc, fmtDate, fmtDateTime, fmtCoded } from "./reportDoc";
 import { fileName, patientSection, BODY_HARM_LABELS, WEAPON_LABELS, SEXUAL_ASSAULT_LABELS } from "./shared";
+import { isDraft } from "./status";
 
 export function buildMlefDoc(form: MLEFForm, patient: Patient | null, generatedBy: string): ReportDoc {
+  const draft = isDraft("mlef", form.status);
+
   const doc = new ReportDoc({
     title: "Medico-Legal Examination Form",
     reportId: form.id,
     generatedBy,
+    draft,
   });
+
+  if (draft) {
+    doc.notice(
+      "This form has not been completed. Sections may be unfilled and the contents "
+      + "remain subject to change. It is not a certified medico-legal document."
+    );
+  }
 
   patientSection(doc, patient, form.patientId);
 
@@ -80,5 +91,8 @@ export function buildMlefDoc(form: MLEFForm, patient: Patient | null, generatedB
 
 export function downloadMlefPdf(form: MLEFForm, patient: Patient | null, generatedBy: string) {
   const doc = buildMlefDoc(form, patient, generatedBy);
-  doc.save(fileName(form.id, patient?.name));
+  // Draft status is visible in the filename too, so a saved copy is identifiable
+  // without opening it.
+  const id = isDraft("mlef", form.status) ? `${form.id}-DRAFT` : form.id;
+  doc.save(fileName(id, patient?.name));
 }

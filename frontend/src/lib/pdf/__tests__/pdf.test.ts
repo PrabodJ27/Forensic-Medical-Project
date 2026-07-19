@@ -4,7 +4,7 @@ import { buildMlrDoc } from "../mlr";
 import { buildPmrDoc } from "../pmr";
 import { buildLabDoc } from "../lab";
 import { fileName } from "../shared";
-import { isDownloadable } from "../status";
+import { isDownloadable, isDraft } from "../status";
 import { fmt, fmtDate, fmtDateTime, fmtCoded } from "../reportDoc";
 import type { MLEFForm, MLRReport, PMRForm, LabRequest, Patient } from "@/types";
 
@@ -121,19 +121,32 @@ describe("Download filenames", () => {
 });
 
 describe("Export eligibility", () => {
-  test("8. Allows only finished records", () => {
+  test("8. Allows finished records", () => {
     expect(isDownloadable("mlef", "complete")).toBe(true);
     expect(isDownloadable("mlr", "submitted")).toBe(true);
     expect(isDownloadable("pmr", "submitted")).toBe(true);
     expect(isDownloadable("lab", "completed")).toBe(true);
   });
 
-  test("9. Blocks drafts and in-progress records", () => {
-    expect(isDownloadable("mlef", "draft")).toBe(false);
+  test("9. Allows MLEF at any stage, including draft", () => {
+    expect(isDownloadable("mlef", "draft")).toBe(true);
+    expect(isDownloadable("mlef", "")).toBe(true);
+  });
+
+  test("10. Still blocks unfinished MLR, PMR and lab records", () => {
     expect(isDownloadable("mlr", "draft")).toBe(false);
     expect(isDownloadable("pmr", "draft")).toBe(false);
     expect(isDownloadable("lab", "pending")).toBe(false);
     expect(isDownloadable("lab", "in_progress")).toBe(false);
+  });
+
+  test("11. Flags unfinished records as drafts", () => {
+    expect(isDraft("mlef", "draft")).toBe(true);
+    expect(isDraft("mlef", "complete")).toBe(false);
+    expect(isDraft("mlr", "draft")).toBe(true);
+    expect(isDraft("mlr", "submitted")).toBe(false);
+    expect(isDraft("lab", "pending")).toBe(true);
+    expect(isDraft("lab", "completed")).toBe(false);
   });
 });
 
@@ -145,17 +158,17 @@ describe("Report generation", () => {
     ["Lab", () => buildLabDoc(LAB, PATIENT, "Dr. Tester")],
   ] as const;
 
-  test.each(cases)("10. %s report produces a valid non-empty PDF", (_name, build) => {
+  test.each(cases)("12. %s report produces a valid non-empty PDF", (_name, build) => {
     const buf = build().output();
     expect(isPdf(buf)).toBe(true);
     expect(buf.byteLength).toBeGreaterThan(2000);
   });
 
-  test.each(cases)("11. %s report paginates rather than overflowing", (_name, build) => {
+  test.each(cases)("13. %s report paginates rather than overflowing", (_name, build) => {
     expect(build().pageCount()).toBeGreaterThanOrEqual(1);
   });
 
-  test("12. Survives a record with missing and null fields", () => {
+  test("14. Survives a record with missing and null fields", () => {
     // Half-filled records are common; a crash here would block a legitimate export.
     const sparse = {
       id: "MLEF-2026-999", patientId: "P2026-001", status: "complete",
@@ -166,17 +179,17 @@ describe("Report generation", () => {
     expect(isPdf(buf)).toBe(true);
   });
 
-  test("13. Survives an unknown patient", () => {
+  test("15. Survives an unknown patient", () => {
     const buf = buildMlrDoc(MLR, null, "Dr. Tester").output();
     expect(isPdf(buf)).toBe(true);
   });
 
-  test("14. Handles MLR with no injuries or grievous entries", () => {
+  test("16. Handles MLR with no injuries or grievous entries", () => {
     const empty = { ...MLR, injuries: [], grievousEntries: [] } as MLRReport;
     expect(isPdf(buildMlrDoc(empty, PATIENT, "Dr. Tester").output())).toBe(true);
   });
 
-  test("15. Long narrative text spills onto additional pages", () => {
+  test("17. Long narrative text spills onto additional pages", () => {
     const wordy = {
       ...MLEF,
       examFindings: "Extensive findings. ".repeat(400),
@@ -184,5 +197,46 @@ describe("Report generation", () => {
     } as MLEFForm;
 
     expect(buildMlefDoc(wordy, PATIENT, "Dr. Tester").pageCount()).toBeGreaterThan(1);
+  });
+});
+
+describe("Draft MLEF export", () => {
+  const DRAFT_MLEF = {
+    ...MLEF, id: "MLEF-2026-002", status: "draft",
+    // A realistic half-filled form: Part A done, Part B untouched
+    hospital: "", ward: "", bhtNo: "", examDateTime: "", bodyHarmTypes: [],
+    causativeWeapon: [], examFindings: "", doctorName: "", partBFilledAt: "",
+  } as MLEFForm;
+
+  test("18. Generates a valid PDF from a half-filled draft", () => {
+    const buf = buildMlefDoc(DRAFT_MLEF, PATIENT, "Dr. Tester").output();
+    expect(isPdf(buf)).toBe(true);
+    expect(buf.byteLength).toBeGreaterThan(2000);
+  });
+
+  test("19. Marks the draft in the document text", () => {
+    const raw = new TextDecoder("latin1").decode(
+      new Uint8Array(buildMlefDoc(DRAFT_MLEF, PATIENT, "Dr. Tester").output())
+    );
+    expect(raw).toContain("DRAFT");
+    expect(raw).toContain("not a certified medico-legal document");
+  });
+
+  test("20. Leaves completed forms unmarked", () => {
+    const raw = new TextDecoder("latin1").decode(
+      new Uint8Array(buildMlefDoc(MLEF, PATIENT, "Dr. Tester").output())
+    );
+    expect(raw).not.toContain("DRAFT, NOT FINAL");
+    expect(raw).not.toContain("not a certified medico-legal document");
+  });
+
+  test("21. Empty Part B fields never leak a raw 'undefined' into the document", () => {
+    // Note: the PDF container itself uses the token `null` in its object
+    // dictionaries, so only "undefined" is safe to search for in raw bytes.
+    // The fmt() unit tests above cover the placeholder rendering directly.
+    const raw = new TextDecoder("latin1").decode(
+      new Uint8Array(buildMlefDoc(DRAFT_MLEF, PATIENT, "Dr. Tester").output())
+    );
+    expect(raw).not.toContain("undefined");
   });
 });
