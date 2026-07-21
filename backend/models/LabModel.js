@@ -43,13 +43,23 @@ class LabModel {
     }
 
     static async getLabRequestById(id) {
-        const query = `SELECT * FROM lab_requests WHERE id = $1;`;
+        const query = `
+      SELECT lr.*, COALESCE(u.name, lr.requested_by_name) as requested_by_name 
+      FROM lab_requests lr
+      LEFT JOIN users u ON u.id = lr.requested_by
+      WHERE lr.id = $1;
+    `;
         const result = await pool.query(query, [id]);
         return result.rows[0];
     }
 
     static async getAllLabRequests() {
-        const query = `SELECT * FROM lab_requests ORDER BY requested_at DESC;`;
+        const query = `
+      SELECT lr.*, COALESCE(u.name, lr.requested_by_name) as requested_by_name 
+      FROM lab_requests lr
+      LEFT JOIN users u ON u.id = lr.requested_by
+      ORDER BY lr.requested_at DESC;
+    `;
         const result = await pool.query(query);
         return result.rows;
     }

@@ -46,6 +46,20 @@ async function migrate() {
         await pool.query("ALTER TABLE mlr_reports ADD COLUMN IF NOT EXISTS pdf_url VARCHAR(500);");
         await pool.query("ALTER TABLE pmr_forms ADD COLUMN IF NOT EXISTS pdf_url VARCHAR(500);");
 
+        // Add foreign key indexes
+        console.log("Creating foreign key indexes for query performance...");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlef_forms_patient_id ON mlef_forms(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlef_forms_created_by ON mlef_forms(created_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_reports_patient_id ON mlr_reports(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_reports_created_by ON mlr_reports(created_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_pmr_forms_patient_id ON pmr_forms(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_pmr_forms_created_by ON pmr_forms(created_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_lab_requests_patient_id ON lab_requests(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_lab_requests_requested_by ON lab_requests(requested_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_injuries_mlr_id ON mlr_injuries(mlr_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_grievous_entries_mlr_id ON mlr_grievous_entries(mlr_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_pmr_identifiers_pmr_id ON pmr_identifiers(pmr_id);");
+
         // Ensure bucket exists in storage.buckets
         console.log("Ensuring images storage bucket exists...");
         await pool.query(`

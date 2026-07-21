@@ -26,15 +26,29 @@ if (missing.length) {
     );
 }
 
-// Run database schema migrations
+// Run database schema migrations & performance index checks
 const runAutoMigrate = async () => {
     try {
-        console.log("Ensuring database columns exist...");
+        console.log("Ensuring database columns and performance indexes exist...");
         await pool.query("ALTER TABLE mlef_forms ADD COLUMN IF NOT EXISTS part_a_pdf_url VARCHAR(500);");
         await pool.query("ALTER TABLE mlef_forms ADD COLUMN IF NOT EXISTS part_b_pdf_url VARCHAR(500);");
         await pool.query("ALTER TABLE mlr_reports ADD COLUMN IF NOT EXISTS pdf_url VARCHAR(500);");
         await pool.query("ALTER TABLE pmr_forms ADD COLUMN IF NOT EXISTS pdf_url VARCHAR(500);");
-        console.log("Database columns migration checked successfully!");
+
+        // Foreign Key Indexes to eliminate full table scans & optimize JOIN performance
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlef_forms_patient_id ON mlef_forms(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlef_forms_created_by ON mlef_forms(created_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_reports_patient_id ON mlr_reports(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_reports_created_by ON mlr_reports(created_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_pmr_forms_patient_id ON pmr_forms(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_pmr_forms_created_by ON pmr_forms(created_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_lab_requests_patient_id ON lab_requests(patient_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_lab_requests_requested_by ON lab_requests(requested_by);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_injuries_mlr_id ON mlr_injuries(mlr_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_mlr_grievous_entries_mlr_id ON mlr_grievous_entries(mlr_id);");
+        await pool.query("CREATE INDEX IF NOT EXISTS idx_pmr_identifiers_pmr_id ON pmr_identifiers(pmr_id);");
+
+        console.log("Database columns and performance indexes verified successfully!");
     } catch (err) {
         console.error("Auto migration check error:", err);
     }

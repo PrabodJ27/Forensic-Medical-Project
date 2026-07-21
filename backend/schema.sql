@@ -199,3 +199,16 @@ CREATE TABLE lab_requests (
     lab_tech_name VARCHAR(255),
     completed_at TIMESTAMP
 );
+
+-- 10. Performance & Referential Integrity Indexes
+CREATE INDEX IF NOT EXISTS idx_mlef_forms_patient_id ON mlef_forms(patient_id);
+CREATE INDEX IF NOT EXISTS idx_mlef_forms_created_by ON mlef_forms(created_by);
+CREATE INDEX IF NOT EXISTS idx_mlr_reports_patient_id ON mlr_reports(patient_id);
+CREATE INDEX IF NOT EXISTS idx_mlr_reports_created_by ON mlr_reports(created_by);
+CREATE INDEX IF NOT EXISTS idx_pmr_forms_patient_id ON pmr_forms(patient_id);
+CREATE INDEX IF NOT EXISTS idx_pmr_forms_created_by ON pmr_forms(created_by);
+CREATE INDEX IF NOT EXISTS idx_lab_requests_patient_id ON lab_requests(patient_id);
+CREATE INDEX IF NOT EXISTS idx_lab_requests_requested_by ON lab_requests(requested_by);
+CREATE INDEX IF NOT EXISTS idx_mlr_injuries_mlr_id ON mlr_injuries(mlr_id);
+CREATE INDEX IF NOT EXISTS idx_mlr_grievous_entries_mlr_id ON mlr_grievous_entries(mlr_id);
+CREATE INDEX IF NOT EXISTS idx_pmr_identifiers_pmr_id ON pmr_identifiers(pmr_id);
